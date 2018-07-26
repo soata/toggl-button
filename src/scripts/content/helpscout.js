@@ -1,6 +1,3 @@
-/*jslint indent: 2 */
-/*global $: false, document: false, togglbutton: false*/
-
 'use strict';
 
 togglbutton.render('.convo-toolbar:not(.toggl)', {observe: true}, function () {
