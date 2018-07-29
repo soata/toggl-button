@@ -1,10 +1,10 @@
-'use strict';
+import { report } from './utils'
+import Db from './db'
 
-var GA_TRACKING_ID = 'UA-3215787-22',
-  GA_KEY = 'GA:clientID',
+var GA_KEY = 'GA:clientID',
   GA_CLIENT_ID = localStorage.getItem(GA_KEY);
 
-var GA = {
+const GA = {
   load: function() {
     if (!GA_CLIENT_ID) {
       GA_CLIENT_ID = this.generateGUID();
@@ -15,7 +15,7 @@ var GA = {
     var request = new XMLHttpRequest(),
       message =
         'v=1&tid=' +
-        GA_TRACKING_ID +
+        process.env.GA_TRACKING_ID +
         '&cid=' +
         GA_CLIENT_ID +
         '&aip=1' +
@@ -130,3 +130,5 @@ var GA = {
 };
 
 GA.load();
+
+export default GA

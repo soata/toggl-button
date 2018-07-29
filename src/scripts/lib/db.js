@@ -1,6 +1,7 @@
-'use strict';
+import bugsnagClient from './bugsnag';
+import origins from '../origins';
 
-var Db = {
+const Db = {
   originsKey: 'TogglButton-origins',
   // settings: key, default value
   settings: {
@@ -40,19 +41,19 @@ var Db = {
       origin = domain;
     }
 
-    if (!TogglOrigins[origin]) {
+    if (!origins[origin]) {
       // Handle cases where subdomain is used (like web.any.do (or sub1.sub2.any.do), we remove web from the beginning)
       origin = origin.split('.');
-      while (origin.length > 0 && !TogglOrigins[origin.join('.')]) {
+      while (origin.length > 0 && !origins[origin.join('.')]) {
         origin.shift();
       }
       origin = origin.join('.');
-      if (!TogglOrigins[origin]) {
+      if (!origins[origin]) {
         return null;
       }
     }
 
-    item = TogglOrigins[origin];
+    item = origins[origin];
 
     if (!!item.file) {
       return item.file;
@@ -265,7 +266,7 @@ var Db = {
         Db.updateSetting(request.type.substr(7), request.state);
       }
     } catch (e) {
-      Bugsnag.notifyException(e);
+      bugsnagClient.notify(e);
     }
 
     return true;
@@ -273,4 +274,5 @@ var Db = {
 };
 
 chrome.runtime.onMessage.addListener(Db.newMessage);
-Db.loadAll();
+
+export default Db;

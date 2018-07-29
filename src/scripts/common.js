@@ -1,13 +1,13 @@
-'use strict';
+import { ProjectAutoComplete, TagAutoComplete } from './lib/autocomplete'
 
 var projectAutocomplete, tagAutocomplete;
 
-function $(s, elem) {
+export const $ = window.$ = (s, elem) => {
   elem = elem || document;
   return elem.querySelector(s);
 }
 
-function createTag(name, className, textContent) {
+export const createTag = window.createTag = (name, className, textContent) => {
   var tag = document.createElement(name);
   tag.className = className;
 
@@ -88,7 +88,7 @@ function secondsToTime(duration, format) {
   return response;
 }
 
-var togglbutton = {
+export var togglbutton = window.togglbutton = {
   $billable: null,
   isStarted: false,
   element: null,

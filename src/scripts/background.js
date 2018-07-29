@@ -1,4 +1,8 @@
-'use strict';
+import bugsnagClient from './lib/bugsnag';
+import { escapeHtml, report, secToHHMM } from './lib/utils';
+import TogglOrigins from './origins'
+
+window.TogglOrigins = TogglOrigins
 
 var openWindowsCount = 0,
   FF = navigator.userAgent.indexOf('Chrome') === -1;
@@ -19,7 +23,7 @@ function filterTabs(handler) {
   };
 }
 
-var TogglButton = {
+var TogglButton = window.TogglButton = {
   $user: null,
   $curEntry: null,
   $latestStoppedEntry: null,
@@ -195,7 +199,7 @@ var TogglButton = {
 
   updateBugsnag: function() {
     // Set user data
-    Bugsnag.user = {
+    bugsnagClient.user = {
       id: TogglButton.$user.id
     };
   },
@@ -625,22 +629,6 @@ var TogglButton = {
         });
       }
     };
-  },
-
-  loadOrigins: function() {
-    TogglButton.ajax('scripts/origins.json', {
-      method: 'GET',
-      baseUrl: '/',
-      mime: true,
-      onLoad: function(xhr) {
-        if (xhr.status === 200) {
-          window.TogglOrigins = JSON.parse(xhr.responseText);
-        }
-      },
-      onError: function(xhr) {
-        report(xhr);
-      }
-    });
   },
 
   ajax: function(url, opts) {
@@ -1739,10 +1727,8 @@ var TogglButton = {
               errorSource = 'Unknown';
             }
 
-            Bugsnag.notifyException(
-              error,
-              request.category + ' Script Error [' + errorSource + ']'
-            );
+            error.name = 'Content Error';
+            bugsnagClient.notify(error);
           } else {
             report(error);
           }
@@ -1817,21 +1803,11 @@ var TogglButton = {
       chrome.tabs.insertCSS(tabId, { file: 'styles/autocomplete.css' });
     });
 
-    chrome.tabs.executeScript(
-      tabId,
-      { file: 'scripts/autocomplete.js' },
-      function() {
-        chrome.tabs.executeScript(
-          tabId,
-          { file: 'scripts/common.js' },
-          function() {
-            chrome.tabs.executeScript(tabId, {
-              file: 'scripts/content/' + file
-            });
-          }
-        );
-      }
-    );
+    chrome.tabs.executeScript(tabId, { file: 'scripts/common.js' }, function() {
+      chrome.tabs.executeScript(tabId, {
+        file: 'scripts/content/' + file
+      });
+    });
   },
 
   extractDomain: function(url) {
@@ -1949,7 +1925,6 @@ var TogglButton = {
   }
 };
 
-TogglButton.loadOrigins();
 TogglButton.queue.push(TogglButton.startAutomatically);
 TogglButton.toggleRightClickButton(Db.get('showRightClickButton'));
 TogglButton.fetchUser();
@@ -2029,3 +2004,11 @@ if (!FF) {
     return true;
   });
 }
+
+import Db from './lib/db'
+import GA from './lib/ga'
+
+window.Db = Db
+window.GA = GA
+
+Db.loadAll();

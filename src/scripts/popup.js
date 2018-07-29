@@ -1,4 +1,4 @@
-'use strict';
+import { ProjectAutoComplete, TagAutoComplete } from './lib/autocomplete'
 
 var TogglButton = chrome.extension.getBackgroundPage().TogglButton,
   Db = chrome.extension.getBackgroundPage().Db,
