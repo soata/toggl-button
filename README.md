@@ -2,6 +2,12 @@
 
 Add Toggl one-click time tracking to popular web tools.
 
+## Fork Changed
+
+Add Two Functions on Todoist
+1. Add todoist.tags as tags automatically
+2. Prefix high indent description to base description
+
 ## Compatible services
 - [AgenoCRM](https://agenocrm.com/)
 - [Airtable](https://airtable.com)
