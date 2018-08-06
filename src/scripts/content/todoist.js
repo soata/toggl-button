@@ -3,7 +3,7 @@
 
 'use strict';
 
-function getProjectNameFromLabel(elem) {
+function getProjectNameFromLabel (elem) {
   var projectLabel = '', projectLabelEle = $('.project_item__name', elem.parentNode.parentNode);
   if (projectLabelEle) {
     projectLabel = projectLabelEle.textContent.trim();
@@ -12,7 +12,7 @@ function getProjectNameFromLabel(elem) {
 }
 
 var levelPattern = /(?:^|\s)indent_([0-9]*?)(?:\s|$)/;
-function getParentEle(sidebarCurrentEle) {
+function getParentEle (sidebarCurrentEle) {
   var curLevel, parentClass, parentCandidate;
   curLevel = sidebarCurrentEle.className.match(levelPattern)[1];
   parentClass = 'indent_' + (curLevel - 1);
@@ -27,11 +27,11 @@ function getParentEle(sidebarCurrentEle) {
   return parentCandidate;
 }
 
-function isTopLevelProject(sidebarCurrentEle) {
+function isTopLevelProject (sidebarCurrentEle) {
   return sidebarCurrentEle.classList.contains('indent_1');
 }
 
-function getProjectNameHierarchy(sidebarCurrentEle) {
+function getProjectNameHierarchy (sidebarCurrentEle) {
   var parentProjectEle, projectName;
   projectName = $('.name', sidebarCurrentEle).firstChild.textContent.trim();
   if (isTopLevelProject(sidebarCurrentEle)) {
@@ -41,11 +41,11 @@ function getProjectNameHierarchy(sidebarCurrentEle) {
   return [projectName].concat(getProjectNameHierarchy(parentProjectEle));
 }
 
-function projectWasJustCreated(projectId) {
+function projectWasJustCreated (projectId) {
   return projectId.startsWith('_');
 }
 
-function getSidebarCurrentEle(elem) {
+function getSidebarCurrentEle (elem) {
   var editorInstance, projectId, sidebarRoot, sidebarColorEle, sidebarCurrentEle;
   editorInstance = elem.closest('.project_editor_instance');
   if (editorInstance) {
@@ -63,7 +63,7 @@ function getSidebarCurrentEle(elem) {
   return sidebarCurrentEle;
 }
 
-function getProjectNames(elem) {
+function getProjectNames (elem) {
   var projectNames, viewingInbox, sidebarCurrentEle;
   viewingInbox = $('#filter_inbox.current, #filter_team_inbox.current');
   if (viewingInbox) {
@@ -79,7 +79,7 @@ function getProjectNames(elem) {
   return projectNames;
 }
 
-togglbutton.render('.task_item .content:not(.toggl)', {observe: true}, function (elem) {
+togglbutton.render('.task_item .content:not(.toggl)', { observe: true }, function (elem) {
   var link, descFunc, container = $('.text', elem);
 
   descFunc = function () {
@@ -90,13 +90,13 @@ togglbutton.render('.task_item .content:not(.toggl)', {observe: true}, function 
     while (clone.children.length > i) {
       child = clone.children[i];
       if (child.tagName === "B"
-          || child.tagName === "I"
-          || child.tagName === "STRONG"
-          || child.tagName === "EM") {
+        || child.tagName === "I"
+        || child.tagName === "STRONG"
+        || child.tagName === "EM") {
         i++;
       } else if (child.tagName === "A") {
         if (child.classList.contains("ex_link")
-            || child.getAttribute("href").indexOf("mailto:") === 0) {
+          || child.getAttribute("href").indexOf("mailto:") === 0) {
           i++;
         } else {
           child.remove();
@@ -109,10 +109,43 @@ togglbutton.render('.task_item .content:not(.toggl)', {observe: true}, function 
     return clone.textContent.trim();
   };
 
+  //add Todoist-Tags as Tags
+  var tagsFunc = function (elem) {
+    var tagElems = elem.querySelectorAll('.labels_holder .label:not(.label_sep)');
+    var i = 0;
+    var tags = [];
+
+    while (tagElems.length > i) {
+      var tag = tagElems[i];
+      tags.push(tag.innerText)
+      i++;
+    }
+
+    return tags;
+  };
+
+  //add ParentIndent Description
+  var getParentDesc = function (elem) {
+    var li = elem.parentNode.parentNode.parentNode.parentNode;
+    var desc = ""
+    if (li.classList.contains('indent_2')) {
+      var prev = li.previousElementSibling;
+      while (prev) {
+        if (prev.classList.contains('indent_1')) {
+          desc = prev.innerText;
+          break;
+        }
+        prev = prev.previousElementSibling;
+      }
+    }
+    return desc
+  }
+
   link = togglbutton.createTimerLink({
     className: 'todoist',
-    description: descFunc(),
-    projectName: getProjectNames(elem)
+    description: getParentDesc(elem) + descFunc(),
+    projectName: getProjectNames(elem),
+    tags: tagsFunc(elem)
   });
 
   container.insertBefore(link, container.lastChild);
